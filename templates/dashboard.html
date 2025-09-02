@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Trend Miner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-chart-line me-2"></i>
+                    AI Trend Miner
+                </a>
+                <div class="navbar-nav ms-auto">
+                    <div id="user-info" style="display: none;">
+                        <span class="navbar-text me-3">
+                            Balance: $<span id="balance">0.00</span>
+                        </span>
+                        <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                    <div id="auth-buttons">
+                        <button class="btn btn-outline-light btn-sm me-2" onclick="showLogin()">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                        <button class="btn btn-primary btn-sm" onclick="showRegister()">
+                            <i class="fas fa-user-plus"></i> Register
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Auth Modal -->
+        <div class="modal fade" id="authModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="authModalTitle">Login</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="authForm">
+                            <div class="mb-3">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" required>
+                            </div>
+                            <div class="mb-3" id="emailField" style="display: none;">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100" id="authSubmit">Login</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="container mt-4">
+            <!-- Dashboard -->
+            <div id="dashboard" style="display: none;">
+                <!-- Portfolio Summary -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Portfolio Value</h5>
+                                <h3 id="portfolio-value">$0.00</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Total P&L</h5>
+                                <h3 id="portfolio-pnl">$0.00</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Positions</h5>
+                                <h3 id="portfolio-positions">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Available Balance</h5>
+                                <h3 id="available-balance">$0.00</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <button class="btn btn-success me-2" onclick="showDepositModal()">
+                            <i class="fas fa-plus"></i> Deposit
+                        </button>
+                        <button class="btn btn-danger me-2" onclick="showWithdrawModal()">
+                            <i class="fas fa-minus"></i> Withdraw
+                        </button>
+                        <button class="btn btn-info me-2" onclick="showPreferencesModal()">
+                            <i class="fas fa-cog"></i> Preferences
+                        </button>
+                        <button class="btn btn-secondary" onclick="refreshData()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#trending">Trending</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#portfolio">Portfolio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#transactions">Transactions</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content mt-3">
+                    <!-- Trending Tab -->
+                    <div class="tab-pane active" id="trending">
+                        <div class="row">
+                            <div class="col-12">
+                                <h5>Trending Stocks & AI Recommendations</h5>
+                                <div id="trending-stocks" class="row">
+                                    <!-- Trending stocks will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Portfolio Tab -->
+                    <div class="tab-pane" id="portfolio">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Quantity</th>
+                                        <th>Avg Price</th>
+                                        <th>Current Value</th>
+                                        <th>P&L</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="portfolio-table">
+                                    <!-- Portfolio items will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Transactions Tab -->
+                    <div class="tab-pane" id="transactions">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Symbol</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactions-table">
+                                    <!-- Transactions will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Welcome Screen -->
+            <div id="welcome" class="text-center">
+                <div class="hero-section py-5">
+                    <h1 class="display-4">AI-Powered Trend Miner</h1>
+                    <p class="lead">Make money in your sleep with our advanced AI trend analysis</p>
+                    <div class="row mt-5">
+                        <div class="col-md-4">
+                            <i class="fas fa-robot fa-3x text-primary mb-3"></i>
+                            <h4>AI Analysis</h4>
+                            <p>Advanced machine learning algorithms analyze market trends 24/7</p>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
+                            <h4>Real-time Data</h4>
+                            <p>Get real-time market data and instant investment recommendations</p>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-dollar-sign fa-3x text-warning mb-3"></i>
+                            <h4>Auto Investing</h4>
+                            <p>Set preferences and let AI make profitable investments automatically</p>
+                        </div>
+                    </div>
+                    <div class="mt-5">
+                        <button class="btn btn-primary btn-lg me-3" onclick="showRegister()">
+                            Get Started
+                        </button>
+                        <button class="btn btn-outline-primary btn-lg" onclick="showLogin()">
+                            Sign In
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Investment Modal -->
+    <div class="modal fade" id="investmentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="investmentModalTitle">Invest</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="investmentForm">
+                        <div class="mb-3">
+                            <label class="form-label">Symbol</label>
+                            <input type="text" class="form-control" id="investSymbol" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Amount ($)</label>
+                            <input type="number" class="form-control" id="investAmount" min="1" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Action</label>
+                            <select class="form-control" id="investAction">
+                                <option value="buy">Buy</option>
+                                <option value="sell">Sell</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Execute Trade</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Other Modals (Deposit, Withdraw, Preferences) would go here -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
