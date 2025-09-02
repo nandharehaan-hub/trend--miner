@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+pandas
+numpy
+scikit-learn
+yfinance
+requests
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+jinja2
+aiofiles
